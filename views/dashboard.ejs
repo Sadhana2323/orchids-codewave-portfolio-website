@@ -1,0 +1,88 @@
+<%- include('partials/header') %>
+
+<section class="dashboard-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="dashboard-card scroll-reveal">
+          <div class="dashboard-header">
+            <div class="dh-avatar"><i class="bi bi-person-fill"></i></div>
+            <div>
+              <h2>Welcome, <%= profile.full_name %>!</h2>
+              <p>Your CodeWave dashboard</p>
+            </div>
+          </div>
+          <div class="dashboard-body">
+            <h5 style="font-weight:700;margin-bottom:20px;color:var(--cw-dark);">Profile Information</h5>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="db-info-card">
+                  <div class="db-info-icon"><i class="bi bi-person"></i></div>
+                  <div>
+                    <label>Full Name</label>
+                    <p><%= profile.full_name %></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="db-info-card">
+                  <div class="db-info-icon"><i class="bi bi-envelope"></i></div>
+                  <div>
+                    <label>Email Address</label>
+                    <p><%= profile.email %></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="db-info-card">
+                  <div class="db-info-icon"><i class="bi bi-calendar3"></i></div>
+                  <div>
+                    <label>Member Since</label>
+                    <p><%= new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="db-info-card">
+                  <div class="db-info-icon"><i class="bi bi-shield-check"></i></div>
+                  <div>
+                    <label>Account Status</label>
+                    <p style="color:#16a34a;">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h5 style="font-weight:700;margin-bottom:16px;color:var(--cw-dark);">Quick Stats</h5>
+            <div class="dashboard-stats-row">
+              <div class="dash-stat-card">
+                <div class="num">0</div>
+                <div class="lbl">Projects</div>
+              </div>
+              <div class="dash-stat-card">
+                <div class="num">0</div>
+                <div class="lbl">Messages</div>
+              </div>
+              <div class="dash-stat-card">
+                <div class="num">0</div>
+                <div class="lbl">Tasks</div>
+              </div>
+              <div class="dash-stat-card">
+                <div class="num">0</div>
+                <div class="lbl">Invoices</div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3" style="border-top:1px solid var(--cw-border);">
+              <a href="/logout" class="btn btn-cw-primary">
+                <i class="bi bi-box-arrow-left me-2"></i>Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+
+<section class="auth-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="auth-card scroll-reveal">
+          <div class="text-center mb-4">
+            <div class="auth-icon"><i class="bi bi-person-plus"></i></div>
+            <h2>Create Account</h2>
+            <p class="text-muted" style="font-size:.92rem;">Join CodeWave Technologies today</p>
+          </div>
+
+          <% if (error) { %>
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-circle me-2"></i><%= error %>
+            </div>
+          <% } %>
+
+          <form action="/signup" method="POST" id="signupForm">
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" name="full_name" class="form-control" placeholder="John Doe" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" name="password" id="signupPassword" class="form-control" placeholder="Min. 6 characters" minlength="6" required>
+              </div>
+              <div class="password-strength mt-2" id="strengthBar"><div class="bar" style="width:0"></div></div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Confirm Password</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" name="confirm_password" id="confirmPassword" class="form-control" placeholder="Repeat password" minlength="6" required>
+              </div>
+              <small class="text-danger d-none" id="passwordMismatch">Passwords do not match</small>
+            </div>
+            <button type="submit" class="btn btn-cw-primary w-100 btn-lg">
+              Create Account <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+          </form>
+          <p class="text-center mt-3" style="color:var(--cw-gray);font-size:.9rem;">
+            Already have an account? <a href="/login" style="color:var(--cw-primary);font-weight:600;">Login</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
