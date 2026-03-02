@@ -2,7 +2,11 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'codewave.db');
+// On Vercel, only /tmp is writable
+const isVercel = !!process.env.VERCEL;
+const dbPath = isVercel
+  ? path.join('/tmp', 'codewave.db')
+  : path.join(__dirname, 'codewave.db');
 
 let db; // sql.js Database instance
 

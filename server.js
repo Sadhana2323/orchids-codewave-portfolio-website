@@ -23,6 +23,17 @@ app.use(session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
+// Initialise the database (async – loads WASM)
+let dbReady = initDB().catch((err) => {
+  console.error('Failed to initialise database:', err);
+});
+
+// Ensure DB is ready before handling any request
+app.use(async (req, res, next) => {
+  await dbReady;
+  next();
+});
+
 // Make user available in all templates
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -126,14 +137,14 @@ app.post('/contact', (req, res) => {
   }
 });
 
-// Initialise the database (async – loads WASM), then start listening
-initDB()
-  .then(() => {
+// Start listening only when running locally (not on Vercel)
+if (!process.env.VERCEL) {
+  dbReady.then(() => {
     app.listen(PORT, () => {
       console.log(`CodeWave Technologies server running at http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error('Failed to initialise database:', err);
-    process.exit(1);
   });
+}
+
+// Export the app for Vercel serverless
+module.exports = app;
