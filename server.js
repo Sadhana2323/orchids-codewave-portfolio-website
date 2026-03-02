@@ -1,9 +1,8 @@
 const express = require('express');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
 const bcrypt = require('bcryptjs');
 const path = require('path');
-const db = require('./db');
+const { initDB, prepare } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,7 +17,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
-  store: new SQLiteStore({ db: 'sessions.db', dir: __dirname }),
   secret: 'codewave-secret-key-2026',
   resave: false,
   saveUninitialized: false,
@@ -64,13 +62,13 @@ app.post('/signup', async (req, res) => {
     return res.render('signup', { page: 'signup', error: 'Passwords do not match.' });
   }
 
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  const existing = prepare('SELECT id FROM users WHERE email = ?').get(email);
   if (existing) {
     return res.render('signup', { page: 'signup', error: 'Email already registered.' });
   }
 
   const hash = await bcrypt.hash(password, 10);
-  db.prepare('INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)').run(full_name, email, hash);
+  prepare('INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)').run(full_name, email, hash);
 
   res.redirect('/login');
 });
@@ -87,7 +85,7 @@ app.post('/login', async (req, res) => {
     return res.render('login', { page: 'login', error: 'All fields are required.' });
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  const user = prepare('SELECT * FROM users WHERE email = ?').get(email);
   if (!user) {
     return res.render('login', { page: 'login', error: 'Invalid email or password.' });
   }
@@ -102,7 +100,7 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/dashboard', requireAuth, (req, res) => {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.user.id);
+  const user = prepare('SELECT * FROM users WHERE id = ?').get(req.session.user.id);
   res.render('dashboard', { page: 'dashboard', profile: user });
 });
 
@@ -120,7 +118,7 @@ app.post('/contact', (req, res) => {
   }
 
   try {
-    db.prepare('INSERT INTO contact_messages (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)')
+    prepare('INSERT INTO contact_messages (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)')
       .run(name, email, phone || null, subject, message);
     res.render('contact', { page: 'contact', success: 'Your message has been sent successfully!', error: null });
   } catch (err) {
@@ -128,6 +126,14 @@ app.post('/contact', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`CodeWave Technologies server running at http://localhost:${PORT}`);
-});
+// Initialise the database (async – loads WASM), then start listening
+initDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`CodeWave Technologies server running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to initialise database:', err);
+    process.exit(1);
+  });
