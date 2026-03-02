@@ -17,21 +17,33 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
-  secret: 'codewave-secret-key-2026',
+  secret: process.env.SESSION_SECRET || 'codewave-secret-key-2026',
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
-// Initialise the database (async – loads WASM)
-let dbReady = initDB().catch((err) => {
-  console.error('Failed to initialise database:', err);
-});
+// DB initialisation promise (created once at cold-start)
+let dbReady = null;
+function ensureDB() {
+  if (!dbReady) {
+    dbReady = initDB().catch((err) => {
+      console.error('Failed to initialise database:', err);
+      dbReady = null; // allow retry on next request
+      throw err;
+    });
+  }
+  return dbReady;
+}
 
 // Ensure DB is ready before handling any request
 app.use(async (req, res, next) => {
-  await dbReady;
-  next();
+  try {
+    await ensureDB();
+    next();
+  } catch (err) {
+    res.status(500).send('Database initialization failed.');
+  }
 });
 
 // Make user available in all templates
@@ -139,7 +151,7 @@ app.post('/contact', (req, res) => {
 
 // Start listening only when running locally (not on Vercel)
 if (!process.env.VERCEL) {
-  dbReady.then(() => {
+  ensureDB().then(() => {
     app.listen(PORT, () => {
       console.log(`CodeWave Technologies server running at http://localhost:${PORT}`);
     });

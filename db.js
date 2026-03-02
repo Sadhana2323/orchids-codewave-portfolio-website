@@ -2,10 +2,10 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-// On Vercel, only /tmp is writable
+// On Vercel, only /tmp is writable; locally use project root
 const isVercel = !!process.env.VERCEL;
 const dbPath = isVercel
-  ? path.join('/tmp', 'codewave.db')
+  ? '/tmp/codewave.db'
   : path.join(__dirname, 'codewave.db');
 
 let db; // sql.js Database instance
@@ -60,7 +60,15 @@ function prepare(sql) {
  * Must be awaited before the server starts accepting requests.
  */
 async function initDB() {
-  const SQL = await initSqlJs();
+  // Locate the sql.js WASM binary
+  const wasmPath = path.join(
+    path.dirname(require.resolve('sql.js')),
+    'sql-wasm.wasm'
+  );
+
+  const SQL = await initSqlJs({
+    locateFile: () => wasmPath
+  });
 
   // Load existing database file if present
   let fileBuffer;
