@@ -7,12 +7,15 @@ const { initDB, prepare } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Use PROJECT_ROOT on Vercel (set by api/index.js), fallback to __dirname locally
+const ROOT_DIR = process.env.PROJECT_ROOT || __dirname;
+
 // View engine
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(ROOT_DIR, 'views'));
 
 // Middleware
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(ROOT_DIR, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

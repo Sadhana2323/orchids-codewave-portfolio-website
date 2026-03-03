@@ -62,21 +62,27 @@ function prepare(sql) {
 async function initDB() {
   let SQL;
 
-  if (process.env.VERCEL) {
-    // On Vercel: fetch WASM binary manually (locateFile doesn't work in Node.js)
-    const wasmUrl = 'https://sql.js.org/dist/sql-wasm.wasm';
-    const response = await fetch(wasmUrl);
-    const wasmBinary = await response.arrayBuffer();
-    SQL = await initSqlJs({ wasmBinary });
-  } else {
-    // Locally: load WASM from node_modules
-    const wasmPath = path.join(
-      path.dirname(require.resolve('sql.js')),
-      'sql-wasm.wasm'
-    );
-    SQL = await initSqlJs({
-      locateFile: () => wasmPath
-    });
+  try {
+    if (process.env.VERCEL) {
+      // On Vercel: fetch WASM binary over HTTP (node_modules WASM isn't bundled)
+      const wasmUrl = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/sql-wasm.wasm';
+      const response = await fetch(wasmUrl);
+      if (!response.ok) throw new Error(`WASM fetch failed: ${response.status}`);
+      const wasmBinary = await response.arrayBuffer();
+      SQL = await initSqlJs({ wasmBinary });
+    } else {
+      // Locally: load WASM from node_modules
+      const wasmPath = path.join(
+        path.dirname(require.resolve('sql.js')),
+        'sql-wasm.wasm'
+      );
+      SQL = await initSqlJs({
+        locateFile: () => wasmPath
+      });
+    }
+  } catch (err) {
+    console.error('sql.js WASM init error:', err);
+    throw err;
   }
 
   // Load existing database file if present
