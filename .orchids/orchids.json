@@ -1,7 +1,0 @@
-{
-  "projectId": "527aae43-3eb2-4c50-9410-658918e561eb",
-  "createdAt": 1770738835811,
-  "version": "1.0",
-  "startupCommands": ["bun install; node server.js"],
-  "templateId": "any"
-}

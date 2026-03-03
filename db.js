@@ -63,10 +63,11 @@ async function initDB() {
   let SQL;
 
   if (process.env.VERCEL) {
-    // On Vercel: load WASM from CDN (file system bundling is unreliable)
-    SQL = await initSqlJs({
-      locateFile: file => `https://sql.js.org/dist/${file}`
-    });
+    // On Vercel: fetch WASM binary manually (locateFile doesn't work in Node.js)
+    const wasmUrl = 'https://sql.js.org/dist/sql-wasm.wasm';
+    const response = await fetch(wasmUrl);
+    const wasmBinary = await response.arrayBuffer();
+    SQL = await initSqlJs({ wasmBinary });
   } else {
     // Locally: load WASM from node_modules
     const wasmPath = path.join(
